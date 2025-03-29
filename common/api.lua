@@ -9,8 +9,7 @@
 --  4. 在弹出的设置页面上，点击右上角的"打开设置（json）"，弹出settings.json。（或通过快捷键Ctrl+P弹出搜索栏，在搜索栏内输入settings.json并打开）
 --  5. 在settings.json中增加以下语句。通过vscode打开要编辑的插件目录，即可在代码中对API自动补全
 --[[    这一行不要复制
-
-{
+   
     "Lua.runtime.version": "Lua 5.4",  
     "Lua.runtime.path": [
       "?.lua",
@@ -20,7 +19,6 @@
       "${workspaceFolder}/common"
     ],
     "Lua.telemetry.enable": false
-}
 
 ]]-- 这一行不要复制
 --------------------------------------------------------
@@ -123,9 +121,9 @@ function Game.Graphics.Find(image, threshold, x, y, w, h) end
 function Game.Graphics.IsBlack() end
 
 --------------------------------------------------------
--- 4.2.2 小地图类(Minimap) —— 位于 Character 中
+-- 4.2.2 小地图类(Minimap)
 --------------------------------------------------------
-Game.Character = Game.Character or {}
+Game.Minimap = Game.Minimap or {}
 
 --- 获取小地图的识别状态和矩形包围框
 -- @return boolean 小地图是否存在，存在返回 true，否则 false
@@ -133,27 +131,28 @@ Game.Character = Game.Character or {}
 -- @return number y 坐标，失败返回 -1
 -- @return number w 宽度，失败返回 -1
 -- @return number h 高度，失败返回 -1
-function Game.Character.GetMinimapRect() end
+function Game.Minimap.GetMinimapRect() end
 
 --- 判断是否有其他玩家存在（包括陌生玩家、好友及家族成员）
 -- @return boolean 有其他玩家存在返回 true，否则 false
-function Game.Character.IsOtherCharacterExist() end
+function Game.Minimap.IsOtherCharacterExist() end
 
 --- 设置自动挂机左边界线
-function Game.Character.SetLeftBoundary() end
+function Game.Minimap.SetLeftBoundary() end
 
 --- 设置自动挂机上边界线
-function Game.Character.SetTopBoundary() end
+function Game.Minimap.SetTopBoundary() end
 
 --- 设置自动挂机右边界线
-function Game.Character.SetRightBoundary() end
+function Game.Minimap.SetRightBoundary() end
 
 --- 设置自动挂机下边界线
-function Game.Character.SetBottomBoundary() end
+function Game.Minimap.SetBottomBoundary() end
 
 --------------------------------------------------------
 -- 4.2.3 游戏角色类(Character)
 --------------------------------------------------------
+Game.Character = Game.Character or {}
 
 --- 启动自动攻击。该指令使用键盘配置页面中选定的配置进行自动攻击，
 -- 启动后立即返回（异步执行），即使脚本退出自动攻击仍然运行。
@@ -162,6 +161,15 @@ function Game.Character.ResumeAutoAttack() end
 
 --- 停止自动攻击
 function Game.Character.PauseAutoAttack() end
+
+--- 检测当前是否处于暂停挂机状态（UI上的暂停选项勾选后，Lua插件立即被停止执行，因此无法检测到UI的暂停选项）
+-- @return boolean true表示当前已经处于暂停状态
+function Game.Character.IsAutoAttackPaused() end
+
+--- 检测当前是否处于暂停挂机状态（UI上的暂停选项勾选后，Lua插件立即被停止执行，因此无法检测到UI的暂停选项）
+-- @return boolean true表示当前已经处于暂停状态
+-- @return table 当前暂停信号(暂停信号为string类型)的table
+function Game.Character.IsAutoAttackPausedEx() end
 
 --- 获取当前血量百分比（范围 0 - 100）
 -- @return number 实际血量百分比
