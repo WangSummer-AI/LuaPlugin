@@ -100,7 +100,7 @@ Game = Game or {}
 Game.Graphics = Game.Graphics or {}
 
 --- 查找屏幕上的图像内容
--- @param image string 被查找图片的资源ID，以 image 开头
+-- @param image string 被查找图片的资源ID
 -- @param threshold number 查找的阈值，范围 0 - 1.0，不填写时默认为 0.8
 -- @param x number 开始查找的左上角 x 坐标（可选，默认全屏）
 -- @param y number 开始查找的左上角 y 坐标（可选，默认全屏）
@@ -114,6 +114,26 @@ Game.Graphics = Game.Graphics or {}
 -- @return number w 宽度
 -- @return number h 高度
 function Game.Graphics.Find(image, threshold, x, y, w, h) end
+
+--- 查找屏幕上指定区域内的图像内容，返回所有匹配目标
+--- @param image string 被查找图片的资源ID，以 "image://" 开头
+--- @param threshold number 查找的置信度阈值，范围 0–1.0，默认值为 0.8
+--- @param x number 起始查找区域左上角的 x 坐标，默认 0
+--- @param y number 起始查找区域左上角的 y 坐标，默认 0
+--- @param w number 查找区域的宽度，默认全屏宽度
+--- @param h number 查找区域的高度，默认全屏高度
+--- @param x_sort number x 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
+--- @param y_sort number y 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
+--- @return number 匹配数量
+--- @return table 匹配结果列表，每个匹配结果为一个 table，包含字段：
+---         confidence number 匹配得分
+---         x number 匹配位置 x 坐标
+---         y number 匹配位置 y 坐标
+---         w number 模板图像宽度
+---         h number 模板图像高度
+function Game.Graphics.FindAll(image, threshold, x, y, w, h, x_sort, y_sort) end
+
+
 
 --- 判断当前是否是黑屏（通过采样屏幕多个点实现），
 -- 返回 true 不一定意味着屏幕完全黑。
@@ -289,8 +309,21 @@ function Game.Mouse.WheelDown() end
 -- 4.3 按键列表（仅作为参考）
 -- 以下按键名称仅供参考，不作为API部分
 --[[
-A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-1 2 3 4 5 6 7 8 9 0 `
+
+字母：A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+数字：1 2 3 4 5 6 7 8 9 0 `
 Alt Ctrl Delete End PageUp PageDown Home Shift Space Insert Esc Enter
 Left Right Up Down
+功能按键：F1-F3,F5-F7,F9-F12（即除了F4和F8之外，其余功能键均可使用）
+LeftBracket - 左方括号 [
+RightBracket - 右方括号 ]
+Semicolon - 分号 ;
+SingleQuote - 单引号 '
+Comma - 逗号 , . / , 几个按键
+SingleQuote - 单引号 '
+Period - 句号 .
+ForwardSlash - 正斜杠 / 
+BackSlash - 反斜杠 \
+TildeKey - 1左侧的按键 `，注意该按键兼容之前使用`的情况，也可以使用新的TildeKey按键
+
 ]]
