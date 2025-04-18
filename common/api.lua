@@ -74,7 +74,24 @@ function System.Notify.Miao(text, retry_count) end
 function System.Notify.MiaoEx(text, retry_count, miao_code) end
 
 --------------------------------------------------------
--- 4.1.3 时间类(Time)
+-- 4.1.4 内核参数(Notify)
+--------------------------------------------------------
+System.Core = System.Core or {}
+
+--- 获取系统状态机当前的运行状态
+-- @return 当前状态，状态值参考如下：
+-- 0 - 初始化状态
+-- 1 - 自动攻击状态
+-- 2 - 移动到符文
+-- 3 - 解符文
+-- 4 - 原地待机
+-- 5 - 识别并跟踪蘑菇
+-- 6 - 等待蘑菇窗口出现
+-- 7 - 识别并处理字符验证码
+function System.Core.GetFsmState() end
+
+--------------------------------------------------------
+-- 4.1.5 时间类(Time)
 --------------------------------------------------------
 System.Time = System.Time or {}
 
@@ -88,6 +105,63 @@ function System.Time.Delay(ms) end
 -- 调整系统时间可能导致时间戳向前或向后跳跃。
 -- @return number 毫秒时间戳
 function System.Time.Now() end
+
+
+--------------------------------------------------------
+-- 4.1.6 线程类(Thread)
+-- 线程模型（System.Thread）
+-- *    - 通过 System.Thread.Run(filename) 启动独立的 LuaState 线程，并返回唯一的 threadId。
+-- *    - 通过 System.Thread.Terminate(threadId) 停止指定线程，内部会对该线程及其所有协程统一设置 Hook，立即中断脚本执行。
+-- *    - 每个 LuaState 生命周期独立、相互隔离，线程切换或者暂停时不会丢失各自的执行上下文和协程状态，方便在调试或脚本恢复时继续执行。
+-- *    - 设计中，所有 LuaState 都由 C++ 统一管理，启动、停止、Hook 注入都可集中控制，避免线程泄漏。
+--------------------------------------------------------
+System.Thread = System.Thread or {}
+
+--- 启动一个独立的 Lua 线程来执行指定脚本
+-- @param filename string 要执行的 Lua 脚本文件名
+-- @return number 返回线程 ID
+function System.Thread.Run(filename) end
+
+--- 停止指定的 Lua 线程
+-- @param threadId number 要停止的线程 ID
+-- @return boolean 停止是否成功
+function System.Thread.Terminate(threadId) end
+
+--------------------------------------------------------
+-- 4.1.7 共享内存(SharedMemory)
+-- 共享内存（System.SharedMemory）
+--  *    - 全局唯一：SharedMemory 采用单例模式（SharedMemory::GetInstance()），所有线程/协程共享同一份数据存储。
+--  *    - 线程安全：内部加锁，所有 Set/Get/Exists/Remove/Clear 操作在并发环境下保证原子性，无竞态。
+--  *    - 数据类型：支持 boolean、integer、number、string，以及以 string 为键的嵌套 table。
+--  *    - 持久性：脚本在任意线程中执行、暂停或切换都不会影响共享内存的内容，数据始终保持可见且不会丢失。
+-- 注意事项：
+-- *  - 共享内存仅支持 string 类型的键，不可存放函数、userdata 或带 metatable 的值。
+-- *  - 高频读写场景下，内部锁可能成为瓶颈，不建议无延迟高频读写。
+-- *  - 调用 System.SharedMemory.Clear() 会删除所有数据，谨慎使用，以免误伤其他线程正在读取的数据。
+--------------------------------------------------------
+System.SharedMemory = System.SharedMemory or {}
+
+--- 设置键值
+-- @param key string 键
+-- @param value any 值，可以是 number|boolean|string|table
+function System.SharedMemory.Set(key, value) end
+
+--- 获取键值
+-- @param key string 键
+-- @return any 存储的值
+function System.SharedMemory.Get(key) end
+
+--- 判断指定键是否存在
+-- @param key string 键
+-- @return boolean 存在返回 true，否则 false
+function System.SharedMemory.Exists(key) end
+
+--- 删除指定键
+-- @param key string 键
+function System.SharedMemory.Remove(key) end
+
+--- 清空所有键值
+function System.SharedMemory.Clear() end
 
 --------------------------------------------------------
 -- 4.2 游戏空间(Game)
