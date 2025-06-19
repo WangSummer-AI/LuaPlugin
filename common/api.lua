@@ -73,6 +73,14 @@ function System.Notify.Miao(text, retry_count) end
 -- @return boolean 发送状态，true 表示成功
 function System.Notify.MiaoEx(text, retry_count, miao_code) end
 
+--- 使用特定的颜色闪烁屏幕或者终止屏幕闪烁
+-- @param start boolean 是否开始闪烁
+-- @param r integer 颜色R分量，0-255
+-- @param g integer 颜色G分量，0-255
+-- @param b integer 颜色B分量，0-255
+-- @return 无
+function System.Notify.ScreenFlashing(start, r, g, b) end
+
 --------------------------------------------------------
 -- 4.1.4 内核参数(Notify)
 --------------------------------------------------------
@@ -88,8 +96,17 @@ System.Core = System.Core or {}
 -- 5 - 识别并跟踪蘑菇
 -- 6 - 等待蘑菇窗口出现
 -- 7 - 识别并处理字符验证码
-function System.Core.GetFsmState() end
+function System.Core.GetFSMState() end
 
+--- 检测当前是否勾选了UI的暂停
+-- 仅在UI勾选暂停后返回true
+-- @return number 毫秒时间戳
+function System.Core.IsUIPaused() end
+
+--- 获取当前客户端版本号
+-- 8位数字，格式如 20250609
+-- @return number 当前版本号信息
+function System.Core.ClientVersion() end
 --------------------------------------------------------
 -- 4.1.5 时间类(Time)
 --------------------------------------------------------
@@ -105,7 +122,6 @@ function System.Time.Delay(ms) end
 -- 调整系统时间可能导致时间戳向前或向后跳跃。
 -- @return number 毫秒时间戳
 function System.Time.Now() end
-
 
 --------------------------------------------------------
 -- 4.1.6 线程类(Thread)
@@ -190,29 +206,53 @@ Game.Graphics = Game.Graphics or {}
 function Game.Graphics.Find(image, threshold, x, y, w, h) end
 
 --- 查找屏幕上指定区域内的图像内容，返回所有匹配目标
---- @param image string 被查找图片的资源ID，以 "image://" 开头
---- @param threshold number 查找的置信度阈值，范围 0–1.0，默认值为 0.8
---- @param x number 起始查找区域左上角的 x 坐标，默认 0
---- @param y number 起始查找区域左上角的 y 坐标，默认 0
---- @param w number 查找区域的宽度，默认全屏宽度
---- @param h number 查找区域的高度，默认全屏高度
---- @param x_sort number x 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
---- @param y_sort number y 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
---- @return number 匹配数量
---- @return table 匹配结果列表，每个匹配结果为一个 table，包含字段：
----         confidence number 匹配得分
----         x number 匹配位置 x 坐标
----         y number 匹配位置 y 坐标
----         w number 模板图像宽度
----         h number 模板图像高度
+-- @param image string 被查找图片的资源ID
+-- @param threshold number 查找的置信度阈值，范围 0–1.0，默认值为 0.8
+-- @param x number 起始查找区域左上角的 x 坐标，默认 0
+-- @param y number 起始查找区域左上角的 y 坐标，默认 0
+-- @param w number 查找区域的宽度，默认全屏宽度
+-- @param h number 查找区域的高度，默认全屏高度
+-- @param x_sort number x 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
+-- @param y_sort number y 坐标排序规则：0 表示不排序，1 表示升序，2 表示降序（默认 0）
+-- @return number 匹配数量
+-- @return table 匹配结果列表，每个匹配结果为一个 table，包含字段：
+--         confidence number 匹配得分
+--         x number 匹配位置 x 坐标
+--         y number 匹配位置 y 坐标
+--         w number 模板图像宽度
+--         h number 模板图像高度
 function Game.Graphics.FindAll(image, threshold, x, y, w, h, x_sort, y_sort) end
-
-
 
 --- 判断当前是否是黑屏（通过采样屏幕多个点实现），
 -- 返回 true 不一定意味着屏幕完全黑。
 -- @return boolean true 表示黑屏
 function Game.Graphics.IsBlack() end
+
+
+--------------------------------------------------------
+-- 4.2.2 传送门事件(EventProtal)
+--------------------------------------------------------
+Game.EventProtal = Game.EventProtal or {}
+--- 判断当前人物处于哪种传送门（红黄门）事件
+-- 
+-- @return string 事件名，可选列表如下：
+--			Unknown			    - 不知道是什么，可能不在任何一个事件里里
+--			InfernoWolf		  - 火焰狼
+--			EagleHunt		    - 打老鹰
+--			ChickDance	  - 小鸡劲舞团
+--			StormWing		    - 风暴之翼，雪地打经验
+--			TreasureCatch	  - 接钻石
+--			BountyHunt		  - 月亮地里扎野猪
+--			GuardCastle		  - 两层塔防
+function Game.EventProtal.Which() end
+
+-- @return boolean 是否在传送门的出口地图
+function Game.EventProtal.IsInExitMap() end
+
+
+-- @return number 匹配数量
+-- @return table 包含字段：string 返回当前的箭头列表，箭头定义：Left, Right, Up, Down
+function Game.EventProtal.Arrows() end
 
 --------------------------------------------------------
 -- 4.2.2 小地图类(Minimap)
@@ -231,17 +271,23 @@ function Game.Minimap.GetMinimapRect() end
 -- @return boolean 有其他玩家存在返回 true，否则 false
 function Game.Minimap.IsOtherCharacterExist() end
 
+--- 判断是否有有红蓝们存在
+-- @return boolean 有红蓝们 true，否则 false，若失败，也返回false
+-- @return number 中心点 x 坐标，失败返回 -1
+-- @return number 中心点 y 坐标，失败返回 -1
+function Game.Minimap.IsEventProtalExist() end
+
 --- 设置自动挂机左边界线
-function Game.Minimap.SetLeftBoundary() end
+function Game.Minimap.SetLeftBoundary(x) end
 
 --- 设置自动挂机上边界线
-function Game.Minimap.SetTopBoundary() end
+function Game.Minimap.SetTopBoundary(y) end
 
 --- 设置自动挂机右边界线
-function Game.Minimap.SetRightBoundary() end
+function Game.Minimap.SetRightBoundary(x) end
 
 --- 设置自动挂机下边界线
-function Game.Minimap.SetBottomBoundary() end
+function Game.Minimap.SetBottomBoundary(y) end
 
 --------------------------------------------------------
 -- 4.2.3 游戏角色类(Character)
